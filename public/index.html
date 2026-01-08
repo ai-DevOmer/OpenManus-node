@@ -1,11 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OMAR AGENT - Web Interface</title>
+    <title>OMAR AGENT - نظام الذكاء الاصطناعي المتقدم</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+
         .typing-indicator span {
             animation: blink 1.4s infinite both;
         }
@@ -16,72 +24,366 @@
             20% { opacity: 1; }
             100% { opacity: 0.1; }
         }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .glass-effect {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .chat-message {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(100%);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                right: 0;
+                top: 0;
+                height: 100vh;
+                z-index: 50;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            right: 50%;
+            transform: translateX(50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col font-sans">
-    <div class="container mx-auto max-w-4xl p-4 flex-grow flex flex-col h-screen">
-        <header class="mb-4 text-center">
-            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-                OMAR AGENT
-            </h1>
-            <p class="text-sm text-gray-400">Powered by Gemini 2.5 Flash</p>
-        </header>
+<body class="text-gray-100">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar w-80 glass-effect p-6 flex flex-col space-y-6 overflow-y-auto">
+            <div class="text-center">
+                <h2 class="text-2xl font-bold gradient-text mb-2">OMAR AGENT</h2>
+                <p class="text-xs text-gray-400">نظام ذكاء اصطناعي متقدم</p>
+            </div>
 
-        <!-- Chat Container -->
-        <div id="chat-container" class="flex-grow bg-gray-800 rounded-lg shadow-xl overflow-y-auto p-4 mb-4 space-y-4 border border-gray-700">
-            <!-- Welcome Message -->
-            <div class="flex items-start">
-                <div class="bg-blue-600 rounded-lg p-3 max-w-[80%]">
-                    <p class="text-sm">Hello! I am OMAR AGENT. I can help you with planning, searching, and general questions. Note: Since I am running in a web environment, some system capabilities (like file system access or executing local scripts) are limited. How can I help you today?</p>
+            <!-- Quick Actions -->
+            <div class="space-y-3">
+                <h3 class="text-sm font-semibold text-gray-300 mb-3">إجراءات سريعة</h3>
+                <button onclick="clearChat()" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-all text-sm">
+                    مسح المحادثة
+                </button>
+                <button onclick="exportChat()" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all text-sm">
+                    تصدير المحادثة
+                </button>
+                <button onclick="toggleTheme()" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-all text-sm">
+                    تغيير المظهر
+                </button>
+            </div>
+
+            <!-- Example Prompts -->
+            <div class="space-y-3">
+                <h3 class="text-sm font-semibold text-gray-300 mb-3">أمثلة للأسئلة</h3>
+                <button onclick="useExample(this)" data-prompt="ابحث عن أحدث أخبار التكنولوجيا" class="w-full text-right bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg transition-all text-xs">
+                    أحدث أخبار التكنولوجيا
+                </button>
+                <button onclick="useExample(this)" data-prompt="اكتب لي قصة قصيرة عن المستقبل" class="w-full text-right bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg transition-all text-xs">
+                    اكتب قصة قصيرة
+                </button>
+                <button onclick="useExample(this)" data-prompt="اشرح لي كيف يعمل الذكاء الاصطناعي" class="w-full text-right bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg transition-all text-xs">
+                    شرح الذكاء الاصطناعي
+                </button>
+                <button onclick="useExample(this)" data-prompt="اعطني خطة تعلم البرمجة من الصفر" class="w-full text-right bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg transition-all text-xs">
+                    خطة تعلم البرمجة
+                </button>
+            </div>
+
+            <!-- Features -->
+            <div class="space-y-3">
+                <h3 class="text-sm font-semibold text-gray-300 mb-3">القدرات المتاحة</h3>
+                <div class="feature-card glass-effect p-3 rounded-lg">
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <span class="text-2xl">🔍</span>
+                        <div>
+                            <h4 class="text-xs font-semibold">البحث على الإنترنت</h4>
+                            <p class="text-xs text-gray-400">ابحث عن أي معلومة</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-card glass-effect p-3 rounded-lg">
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <span class="text-2xl">📝</span>
+                        <div>
+                            <h4 class="text-xs font-semibold">التخطيط والتنظيم</h4>
+                            <p class="text-xs text-gray-400">إنشاء خطط تفصيلية</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-card glass-effect p-3 rounded-lg">
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <span class="text-2xl">💬</span>
+                        <div>
+                            <h4 class="text-xs font-semibold">المحادثة الذكية</h4>
+                            <p class="text-xs text-gray-400">ردود دقيقة ومفصلة</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-card glass-effect p-3 rounded-lg">
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <span class="text-2xl">⚡</span>
+                        <div>
+                            <h4 class="text-xs font-semibold">معالجة فورية</h4>
+                            <p class="text-xs text-gray-400">استجابة سريعة</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="glass-effect p-4 rounded-lg">
+                <h3 class="text-sm font-semibold text-gray-300 mb-3">إحصائيات الجلسة</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-400">عدد الرسائل:</span>
+                        <span id="message-count" class="font-semibold">0</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-400">الحالة:</span>
+                        <span id="status" class="font-semibold text-green-400">نشط</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Input Area -->
-        <form id="chat-form" class="flex gap-2">
-            <input type="text" id="user-input" 
-                class="flex-grow bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors"
-                placeholder="Type your message..." autocomplete="off">
-            <button type="submit" 
-                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
-                Send
-            </button>
-        </form>
+        <!-- Main Chat Area -->
+        <div class="flex-1 flex flex-col">
+            <!-- Header -->
+            <header class="glass-effect p-4 flex items-center justify-between">
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <button id="sidebar-toggle" onclick="toggleSidebar()" class="md:hidden text-white hover:text-blue-400 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <div>
+                        <h1 class="text-xl font-bold gradient-text">OMAR AGENT</h1>
+                        <p class="text-xs text-gray-400">مساعدك الذكي المتقدم</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3 space-x-reverse">
+                    <div class="tooltip" data-tooltip="الإعدادات">
+                        <button class="p-2 hover:bg-slate-700 rounded-lg transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="tooltip" data-tooltip="معلومات">
+                        <button class="p-2 hover:bg-slate-700 rounded-lg transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Chat Container -->
+            <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4">
+                <!-- Welcome Message -->
+                <div class="chat-message flex items-start">
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-4 max-w-[80%] shadow-lg">
+                        <p class="text-sm leading-relaxed">مرحباً بك في OMAR AGENT! أنا مساعدك الذكي المتقدم. يمكنني مساعدتك في:
+
+📌 البحث على الإنترنت والحصول على أحدث المعلومات
+📌 إنشاء خطط تفصيلية وتنظيم المهام
+📌 الإجابة على أسئلتك بدقة
+📌 كتابة المحتوى والنصوص
+📌 حل المشاكل والتخطيط
+
+كيف يمكنني مساعدتك اليوم؟</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="glass-effect p-4">
+                <form id="chat-form" class="flex gap-3">
+                    <button type="button" onclick="attachFile()" class="tooltip p-3 bg-slate-700 hover:bg-slate-600 rounded-xl transition-all" data-tooltip="إرفاق ملف">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                    </button>
+                    <input type="text" id="user-input"
+                        class="flex-1 bg-slate-800 border border-slate-600 text-white rounded-xl px-5 py-3 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 transition-all text-sm"
+                        placeholder="اكتب رسالتك هنا..." autocomplete="off">
+                    <button type="submit" id="send-button"
+                        class="tooltip bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 rounded-xl transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-blue-500/50" data-tooltip="إرسال">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                    </button>
+                </form>
+                <div class="flex items-center justify-between mt-2 text-xs text-gray-400">
+                    <span>اضغط Enter للإرسال</span>
+                    <span id="char-count">0 / 5000</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        let messageCount = 0;
         const chatContainer = document.getElementById('chat-container');
         const chatForm = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
-        const submitButton = chatForm.querySelector('button');
+        const submitButton = document.getElementById('send-button');
+        const charCount = document.getElementById('char-count');
+
+        // Character counter
+        userInput.addEventListener('input', () => {
+            const length = userInput.value.length;
+            charCount.textContent = `${length} / 5000`;
+            if (length > 5000) {
+                charCount.classList.add('text-red-400');
+            } else {
+                charCount.classList.remove('text-red-400');
+            }
+        });
+
+        // Sidebar toggle for mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden');
+        }
+
+        // Clear chat
+        function clearChat() {
+            if (confirm('هل أنت متأكد من مسح جميع المحادثات؟')) {
+                chatContainer.innerHTML = `
+                    <div class="chat-message flex items-start">
+                        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-4 max-w-[80%] shadow-lg">
+                            <p class="text-sm leading-relaxed">تم مسح المحادثة. كيف يمكنني مساعدتك؟</p>
+                        </div>
+                    </div>
+                `;
+                messageCount = 0;
+                updateMessageCount();
+            }
+        }
+
+        // Export chat
+        function exportChat() {
+            const messages = Array.from(chatContainer.querySelectorAll('.chat-message'));
+            const text = messages.map(msg => msg.textContent).join('\n\n');
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `omar-agent-chat-${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Toggle theme
+        function toggleTheme() {
+            alert('خاصية تغيير المظهر ستكون متاحة قريباً!');
+        }
+
+        // Use example prompt
+        function useExample(button) {
+            const prompt = button.getAttribute('data-prompt');
+            userInput.value = prompt;
+            userInput.focus();
+        }
+
+        // Attach file
+        function attachFile() {
+            alert('خاصية إرفاق الملفات ستكون متاحة قريباً!');
+        }
+
+        // Update message count
+        function updateMessageCount() {
+            document.getElementById('message-count').textContent = messageCount;
+        }
 
         function addMessage(role, text) {
             const div = document.createElement('div');
-            div.className = `flex items-start ${role === 'user' ? 'justify-end' : ''}`;
-            
+            div.className = `chat-message flex items-start ${role === 'user' ? 'justify-end' : ''}`;
+
             const bubble = document.createElement('div');
-            bubble.className = `rounded-lg p-3 max-w-[80%] ${role === 'user' ? 'bg-purple-600' : 'bg-gray-700'}`;
-            
+            bubble.className = `rounded-2xl p-4 max-w-[80%] shadow-lg ${
+                role === 'user'
+                ? 'bg-gradient-to-r from-slate-700 to-slate-600'
+                : 'bg-gradient-to-r from-slate-800 to-slate-700'
+            }`;
+
             const p = document.createElement('p');
-            p.className = 'text-sm whitespace-pre-wrap';
+            p.className = 'text-sm whitespace-pre-wrap leading-relaxed';
             p.textContent = text;
-            
+
             bubble.appendChild(p);
             div.appendChild(bubble);
             chatContainer.appendChild(div);
             chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            messageCount++;
+            updateMessageCount();
         }
 
         function addLoading() {
             const div = document.createElement('div');
             div.id = 'loading-indicator';
-            div.className = 'flex items-start';
+            div.className = 'chat-message flex items-start';
             div.innerHTML = `
-                <div class="bg-gray-700 rounded-lg p-3">
-                    <div class="typing-indicator flex space-x-1">
-                        <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
-                        <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
-                        <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
+                <div class="bg-slate-700 rounded-2xl p-4 shadow-lg">
+                    <div class="typing-indicator flex space-x-2">
+                        <span class="w-2.5 h-2.5 bg-blue-400 rounded-full"></span>
+                        <span class="w-2.5 h-2.5 bg-blue-400 rounded-full"></span>
+                        <span class="w-2.5 h-2.5 bg-blue-400 rounded-full"></span>
                     </div>
                 </div>
             `;
@@ -93,12 +395,14 @@
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = userInput.value.trim();
-            if (!text) return;
+            if (!text || text.length > 5000) return;
 
             // Disable input
             userInput.value = '';
             userInput.disabled = true;
             submitButton.disabled = true;
+            document.getElementById('status').textContent = 'جاري المعالجة...';
+            document.getElementById('status').className = 'font-semibold text-yellow-400';
 
             // Add user message
             addMessage('user', text);
@@ -114,23 +418,33 @@
                 });
 
                 const data = await response.json();
-                
+
                 // Remove loading
                 loading.remove();
 
                 if (data.error) {
-                    addMessage('assistant', 'Error: ' + data.error);
+                    addMessage('assistant', 'خطأ: ' + data.error);
                 } else {
                     addMessage('assistant', data.result);
                 }
             } catch (error) {
                 loading.remove();
-                addMessage('assistant', 'Network Error: ' + error.message);
+                addMessage('assistant', 'خطأ في الاتصال: ' + error.message);
             } finally {
                 // Re-enable input
                 userInput.disabled = false;
                 submitButton.disabled = false;
                 userInput.focus();
+                document.getElementById('status').textContent = 'نشط';
+                document.getElementById('status').className = 'font-semibold text-green-400';
+            }
+        });
+
+        // Enter to send
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
             }
         });
     </script>

@@ -25,7 +25,7 @@ export class ManusWeb extends ToolCallAgent {
       description: "A versatile agent that can solve various tasks using multiple tools (Web Safe)",
       system_prompt: WEB_SYSTEM_PROMPT,
       next_step_prompt: WEB_NEXT_STEP_PROMPT,
-      max_steps: options.max_steps ?? 10 // Lower default for web
+      max_steps: options.max_steps ?? 50
     });
     // Define a safe set of tools for Web/Serverless environment
     this["available_tools"] = new ToolCollection(

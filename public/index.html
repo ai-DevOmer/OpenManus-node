@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OMAR AGENT - نظام الذكاء الاصطناعي المتقدم</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -53,6 +54,23 @@
             }
         }
 
+        .action-btn {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .action-btn.active {
+            ring: 2px;
+            ring-offset: 2px;
+            ring-color: rgba(59, 130, 246, 0.8);
+        }
+
         .feature-card {
             transition: all 0.3s ease;
         }
@@ -92,11 +110,94 @@
             transform: translateX(50%);
             background: rgba(0, 0, 0, 0.9);
             color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
             white-space: nowrap;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            z-index: 100;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            background: currentColor;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+            margin: 0 2px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .action-buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .search-highlight {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.3), transparent);
+            border-left: 3px solid #3b82f6;
+            padding-left: 12px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: rgba(30, 41, 59, 0.95);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid #3b82f6;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -118,67 +219,73 @@
                 <button onclick="exportChat()" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all text-sm">
                     تصدير المحادثة
                 </button>
-                <button onclick="toggleTheme()" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-all text-sm">
-                    تغيير المظهر
+                <button onclick="openSettings()" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-all text-sm">
+                    الإعدادات
                 </button>
             </div>
 
-            <!-- Example Prompts -->
+            <!-- AI Capabilities -->
             <div class="space-y-3">
-                <h3 class="text-sm font-semibold text-gray-300 mb-3">أمثلة للأسئلة</h3>
-                <button onclick="useExample(this)" data-prompt="ابحث عن أحدث أخبار التكنولوجيا" class="w-full text-right bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg transition-all text-xs">
-                    أحدث أخبار التكنولوجيا
+                <h3 class="text-sm font-semibold text-gray-300 mb-3">القدرات المتقدمة</h3>
+                <div class="feature-card glass-effect p-3 rounded-lg cursor-pointer" onclick="useQuickAction('search')">
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <span class="text-xl">🔍</span>
+                        <div>
+                            <h4 class="text-xs font-semibold">البحث المتقدم</h4>
+                            <p class="text-xs text-gray-400">ابحث عن معلومات</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-card glass-effect p-3 rounded-lg cursor-pointer" onclick="useQuickAction('plan')">
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <span class="text-xl">📋</span>
+                        <div>
+                            <h4 class="text-xs font-semibold">التخطيط الذكي</h4>
+                            <p class="text-xs text-gray-400">خطط استراتيجية</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-card glass-effect p-3 rounded-lg cursor-pointer" onclick="useQuickAction('write')">
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <span class="text-xl">✍️</span>
+                        <div>
+                            <h4 class="text-xs font-semibold">الكتابة الإبداعية</h4>
+                            <p class="text-xs text-gray-400">محتوى احترافي</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-card glass-effect p-3 rounded-lg cursor-pointer" onclick="useQuickAction('analyze')">
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <span class="text-xl">🔬</span>
+                        <div>
+                            <h4 class="text-xs font-semibold">التحليل العميق</h4>
+                            <p class="text-xs text-gray-400">تحليل شامل</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-card glass-effect p-3 rounded-lg cursor-pointer" onclick="useQuickAction('code')">
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <span class="text-xl">💻</span>
+                        <div>
+                            <h4 class="text-xs font-semibold">البرمجة الذكية</h4>
+                            <p class="text-xs text-gray-400">كود احترافي</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Prompts -->
+            <div class="space-y-3">
+                <h3 class="text-sm font-semibold text-gray-300 mb-3">أسئلة سريعة</h3>
+                <button onclick="useExample('ابحث عن أحدث تطورات الذكاء الاصطناعي')" class="w-full text-right bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg transition-all text-xs">
+                    أحدث تطورات الذكاء الاصطناعي
                 </button>
-                <button onclick="useExample(this)" data-prompt="اكتب لي قصة قصيرة عن المستقبل" class="w-full text-right bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg transition-all text-xs">
-                    اكتب قصة قصيرة
-                </button>
-                <button onclick="useExample(this)" data-prompt="اشرح لي كيف يعمل الذكاء الاصطناعي" class="w-full text-right bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg transition-all text-xs">
-                    شرح الذكاء الاصطناعي
-                </button>
-                <button onclick="useExample(this)" data-prompt="اعطني خطة تعلم البرمجة من الصفر" class="w-full text-right bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg transition-all text-xs">
+                <button onclick="useExample('خطط شاملة لتعلم البرمجة')" class="w-full text-right bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg transition-all text-xs">
                     خطة تعلم البرمجة
                 </button>
-            </div>
-
-            <!-- Features -->
-            <div class="space-y-3">
-                <h3 class="text-sm font-semibold text-gray-300 mb-3">القدرات المتاحة</h3>
-                <div class="feature-card glass-effect p-3 rounded-lg">
-                    <div class="flex items-center space-x-2 space-x-reverse">
-                        <span class="text-2xl">🔍</span>
-                        <div>
-                            <h4 class="text-xs font-semibold">البحث على الإنترنت</h4>
-                            <p class="text-xs text-gray-400">ابحث عن أي معلومة</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="feature-card glass-effect p-3 rounded-lg">
-                    <div class="flex items-center space-x-2 space-x-reverse">
-                        <span class="text-2xl">📝</span>
-                        <div>
-                            <h4 class="text-xs font-semibold">التخطيط والتنظيم</h4>
-                            <p class="text-xs text-gray-400">إنشاء خطط تفصيلية</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="feature-card glass-effect p-3 rounded-lg">
-                    <div class="flex items-center space-x-2 space-x-reverse">
-                        <span class="text-2xl">💬</span>
-                        <div>
-                            <h4 class="text-xs font-semibold">المحادثة الذكية</h4>
-                            <p class="text-xs text-gray-400">ردود دقيقة ومفصلة</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="feature-card glass-effect p-3 rounded-lg">
-                    <div class="flex items-center space-x-2 space-x-reverse">
-                        <span class="text-2xl">⚡</span>
-                        <div>
-                            <h4 class="text-xs font-semibold">معالجة فورية</h4>
-                            <p class="text-xs text-gray-400">استجابة سريعة</p>
-                        </div>
-                    </div>
-                </div>
+                <button onclick="useExample('اكتب قصة خيال علمي قصيرة')" class="w-full text-right bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg transition-all text-xs">
+                    قصة خيال علمي
+                </button>
             </div>
 
             <!-- Stats -->
@@ -187,11 +294,15 @@
                 <div class="space-y-2">
                     <div class="flex justify-between text-xs">
                         <span class="text-gray-400">عدد الرسائل:</span>
-                        <span id="message-count" class="font-semibold">0</span>
+                        <span id="message-count" class="font-semibold text-blue-400">0</span>
                     </div>
                     <div class="flex justify-between text-xs">
                         <span class="text-gray-400">الحالة:</span>
                         <span id="status" class="font-semibold text-green-400">نشط</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-400">الوقت:</span>
+                        <span id="session-time" class="font-semibold">0:00</span>
                     </div>
                 </div>
             </div>
@@ -200,71 +311,87 @@
         <!-- Main Chat Area -->
         <div class="flex-1 flex flex-col">
             <!-- Header -->
-            <header class="glass-effect p-4 flex items-center justify-between">
+            <header class="glass-effect p-4 flex items-center justify-between border-b border-slate-700">
                 <div class="flex items-center space-x-4 space-x-reverse">
                     <button id="sidebar-toggle" onclick="toggleSidebar()" class="md:hidden text-white hover:text-blue-400 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
+                        <i class="fas fa-bars text-xl"></i>
                     </button>
                     <div>
-                        <h1 class="text-xl font-bold gradient-text">OMAR AGENT</h1>
-                        <p class="text-xs text-gray-400">مساعدك الذكي المتقدم</p>
+                        <h1 class="text-2xl font-bold gradient-text">OMAR AGENT</h1>
+                        <p class="text-xs text-gray-400">مساعدك الذكي المتقدم - نسخة متطورة</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3 space-x-reverse">
-                    <div class="tooltip" data-tooltip="الإعدادات">
-                        <button class="p-2 hover:bg-slate-700 rounded-lg transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
+                    <div class="tooltip" data-tooltip="إعدادات">
+                        <button onclick="openSettings()" class="p-2 hover:bg-slate-700 rounded-lg transition-colors">
+                            <i class="fas fa-cog text-blue-400"></i>
                         </button>
                     </div>
                     <div class="tooltip" data-tooltip="معلومات">
-                        <button class="p-2 hover:bg-slate-700 rounded-lg transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                        <button onclick="showAbout()" class="p-2 hover:bg-slate-700 rounded-lg transition-colors">
+                            <i class="fas fa-info-circle text-blue-400"></i>
                         </button>
                     </div>
                 </div>
             </header>
 
+            <!-- Action Buttons Bar -->
+            <div class="glass-effect p-3 border-b border-slate-700">
+                <div class="action-buttons-grid">
+                    <button class="action-btn bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1 space-x-reverse" onclick="setAction('chat')" id="btn-chat">
+                        <i class="fas fa-comments"></i>
+                        <span>محادثة</span>
+                    </button>
+                    <button class="action-btn bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1 space-x-reverse" onclick="setAction('search')" id="btn-search">
+                        <i class="fas fa-search"></i>
+                        <span>بحث</span>
+                    </button>
+                    <button class="action-btn bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1 space-x-reverse" onclick="setAction('plan')" id="btn-plan">
+                        <i class="fas fa-tasks"></i>
+                        <span>تخطيط</span>
+                    </button>
+                    <button class="action-btn bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1 space-x-reverse" onclick="setAction('write')" id="btn-write">
+                        <i class="fas fa-pen"></i>
+                        <span>كتابة</span>
+                    </button>
+                    <button class="action-btn bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1 space-x-reverse" onclick="setAction('code')" id="btn-code">
+                        <i class="fas fa-code"></i>
+                        <span>برمجة</span>
+                    </button>
+                    <button class="action-btn bg-pink-600 hover:bg-pink-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1 space-x-reverse" onclick="setAction('analyze')" id="btn-analyze">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>تحليل</span>
+                    </button>
+                </div>
+            </div>
+
             <!-- Chat Container -->
             <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4">
-                <!-- Welcome Message -->
                 <div class="chat-message flex items-start">
-                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-4 max-w-[80%] shadow-lg">
-                        <p class="text-sm leading-relaxed">مرحباً بك في OMAR AGENT! أنا مساعدك الذكي المتقدم. يمكنني مساعدتك في:
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-4 max-w-[85%] shadow-lg">
+                        <p class="text-sm leading-relaxed font-semibold mb-2">مرحباً بك في OMAR AGENT</p>
+                        <p class="text-sm leading-relaxed">أنا مساعدك الذكي المتقدم مع قدرات شاملة:
 
-📌 البحث على الإنترنت والحصول على أحدث المعلومات
-📌 إنشاء خطط تفصيلية وتنظيم المهام
-📌 الإجابة على أسئلتك بدقة
-📌 كتابة المحتوى والنصوص
-📌 حل المشاكل والتخطيط
+🔍 البحث المتقدم - ابحث عن أي معلومة على الإنترنت
+📋 التخطيط الذكي - أنشئ خطط استراتيجية وتفصيلية
+✍️ الكتابة الإبداعية - اكتب محتوى احترافي وإبداعي
+🔬 التحليل العميق - حلل أي موضوع بعمق
+💻 البرمجة الذكية - اكتب وحلل أكواد احترافية
 
-كيف يمكنني مساعدتك اليوم؟</p>
+اختر إحدى الأزرار أعلاه أو اكتب سؤالك مباشرة!</p>
                     </div>
                 </div>
             </div>
 
             <!-- Input Area -->
-            <div class="glass-effect p-4">
+            <div class="glass-effect p-4 border-t border-slate-700">
                 <form id="chat-form" class="flex gap-3">
-                    <button type="button" onclick="attachFile()" class="tooltip p-3 bg-slate-700 hover:bg-slate-600 rounded-xl transition-all" data-tooltip="إرفاق ملف">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                        </svg>
-                    </button>
                     <input type="text" id="user-input"
                         class="flex-1 bg-slate-800 border border-slate-600 text-white rounded-xl px-5 py-3 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 transition-all text-sm"
-                        placeholder="اكتب رسالتك هنا..." autocomplete="off">
+                        placeholder="اكتب رسالتك هنا...أو اختر إحدى الميزات أعلاه" autocomplete="off">
                     <button type="submit" id="send-button"
-                        class="tooltip bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 rounded-xl transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-blue-500/50" data-tooltip="إرسال">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                        </svg>
+                        class="tooltip bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 rounded-xl transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-blue-500/50 flex items-center justify-center" data-tooltip="إرسال (Enter)">
+                        <i class="fas fa-paper-plane"></i>
                     </button>
                 </form>
                 <div class="flex items-center justify-between mt-2 text-xs text-gray-400">
@@ -275,13 +402,86 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold gradient-text">الإعدادات</h2>
+                <button onclick="closeModal('settingsModal')" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm font-semibold text-gray-300 mb-2 block">حجم الخط</label>
+                    <div class="flex gap-2">
+                        <button onclick="setFontSize('small')" class="px-4 py-2 bg-slate-700 rounded-lg text-xs">صغير</button>
+                        <button onclick="setFontSize('normal')" class="px-4 py-2 bg-blue-600 rounded-lg text-xs">عادي</button>
+                        <button onclick="setFontSize('large')" class="px-4 py-2 bg-slate-700 rounded-lg text-xs">كبير</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-gray-300 mb-2 block">
+                        <input type="checkbox" id="autoScroll" checked> التمرير التلقائي
+                    </label>
+                </div>
+                <button onclick="clearData()" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm">حذف جميع البيانات</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div id="aboutModal" class="modal">
+        <div class="modal-content">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold gradient-text">حول OMAR AGENT</h2>
+                <button onclick="closeModal('aboutModal')" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-4 text-sm">
+                <p><strong>الإصدار:</strong> 2.0 - متطور</p>
+                <p><strong>الوصف:</strong> نظام ذكاء اصطناعي متقدم مع قدرات شاملة</p>
+                <p><strong>الميزات:</strong></p>
+                <ul class="list-disc list-inside space-y-1 text-gray-400">
+                    <li>البحث المتقدم على الإنترنت</li>
+                    <li>التخطيط الاستراتيجي الذكي</li>
+                    <li>الكتابة الإبداعية والاحترافية</li>
+                    <li>التحليل العميق والشامل</li>
+                    <li>البرمجة والترميز المتقدم</li>
+                    <li>يعمل على أي استضافة</li>
+                </ul>
+                <p class="text-xs text-gray-500 mt-4">آخر تحديث: 2024</p>
+            </div>
+        </div>
+    </div>
+
     <script>
         let messageCount = 0;
+        let sessionStartTime = Date.now();
+        let currentAction = 'chat';
         const chatContainer = document.getElementById('chat-container');
         const chatForm = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
         const submitButton = document.getElementById('send-button');
         const charCount = document.getElementById('char-count');
+
+        const actionPrompts = {
+            'search': 'ابحث عن: ',
+            'plan': 'خطط لـ: ',
+            'write': 'اكتب عن: ',
+            'code': 'اكتب كود لـ: ',
+            'analyze': 'حلل: ',
+            'chat': 'قل لي عن: '
+        };
+
+        // Update session time
+        setInterval(() => {
+            const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('session-time').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }, 1000);
 
         // Character counter
         userInput.addEventListener('input', () => {
@@ -294,6 +494,20 @@
             }
         });
 
+        // Action buttons
+        function setAction(action) {
+            currentAction = action;
+            document.querySelectorAll('.action-btn').forEach(btn => btn.classList.remove('active', 'ring'));
+            document.getElementById(`btn-${action}`).classList.add('active', 'ring');
+            userInput.placeholder = `${actionPrompts[action]}...`;
+            userInput.focus();
+        }
+
+        function useQuickAction(action) {
+            setAction(action);
+            userInput.focus();
+        }
+
         // Sidebar toggle for mobile
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -305,7 +519,7 @@
             if (confirm('هل أنت متأكد من مسح جميع المحادثات؟')) {
                 chatContainer.innerHTML = `
                     <div class="chat-message flex items-start">
-                        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-4 max-w-[80%] shadow-lg">
+                        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-4 max-w-[85%] shadow-lg">
                             <p class="text-sm leading-relaxed">تم مسح المحادثة. كيف يمكنني مساعدتك؟</p>
                         </div>
                     </div>
@@ -319,30 +533,46 @@
         function exportChat() {
             const messages = Array.from(chatContainer.querySelectorAll('.chat-message'));
             const text = messages.map(msg => msg.textContent).join('\n\n');
-            const blob = new Blob([text], { type: 'text/plain' });
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `omar-agent-chat-${Date.now()}.txt`;
+            a.download = `omar-agent-${Date.now()}.txt`;
             a.click();
             URL.revokeObjectURL(url);
         }
 
-        // Toggle theme
-        function toggleTheme() {
-            alert('خاصية تغيير المظهر ستكون متاحة قريباً!');
+        // Settings
+        function openSettings() {
+            document.getElementById('settingsModal').classList.add('show');
+        }
+
+        function showAbout() {
+            document.getElementById('aboutModal').classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        function setFontSize(size) {
+            const sizes = { small: '12px', normal: '14px', large: '16px' };
+            chatContainer.style.fontSize = sizes[size];
+            localStorage.setItem('fontSize', size);
+        }
+
+        function clearData() {
+            if (confirm('سيتم حذف جميع البيانات. متأكد؟')) {
+                localStorage.clear();
+                clearChat();
+                closeModal('settingsModal');
+            }
         }
 
         // Use example prompt
-        function useExample(button) {
-            const prompt = button.getAttribute('data-prompt');
+        function useExample(prompt) {
             userInput.value = prompt;
             userInput.focus();
-        }
-
-        // Attach file
-        function attachFile() {
-            alert('خاصية إرفاق الملفات ستكون متاحة قريباً!');
         }
 
         // Update message count
@@ -355,7 +585,7 @@
             div.className = `chat-message flex items-start ${role === 'user' ? 'justify-end' : ''}`;
 
             const bubble = document.createElement('div');
-            bubble.className = `rounded-2xl p-4 max-w-[80%] shadow-lg ${
+            bubble.className = `rounded-2xl p-4 max-w-[85%] shadow-lg ${
                 role === 'user'
                 ? 'bg-gradient-to-r from-slate-700 to-slate-600'
                 : 'bg-gradient-to-r from-slate-800 to-slate-700'
@@ -363,15 +593,24 @@
 
             const p = document.createElement('p');
             p.className = 'text-sm whitespace-pre-wrap leading-relaxed';
-            p.textContent = text;
+            p.innerHTML = sanitizeHTML(text);
 
             bubble.appendChild(p);
             div.appendChild(bubble);
             chatContainer.appendChild(div);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            if (document.getElementById('autoScroll').checked) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
 
             messageCount++;
             updateMessageCount();
+        }
+
+        function sanitizeHTML(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         function addLoading() {
@@ -414,24 +653,24 @@
                 const response = await fetch('/api/agent', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: text })
+                    body: JSON.stringify({
+                        prompt: text,
+                        action: currentAction
+                    })
                 });
 
                 const data = await response.json();
-
-                // Remove loading
                 loading.remove();
 
                 if (data.error) {
-                    addMessage('assistant', 'خطأ: ' + data.error);
+                    addMessage('assistant', '❌ خطأ: ' + data.error);
                 } else {
                     addMessage('assistant', data.result);
                 }
             } catch (error) {
                 loading.remove();
-                addMessage('assistant', 'خطأ في الاتصال: ' + error.message);
+                addMessage('assistant', '⚠️ خطأ في الاتصال: ' + error.message);
             } finally {
-                // Re-enable input
                 userInput.disabled = false;
                 submitButton.disabled = false;
                 userInput.focus();
@@ -446,6 +685,20 @@
                 e.preventDefault();
                 chatForm.dispatchEvent(new Event('submit'));
             }
+        });
+
+        // Close modals on background click
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('show');
+            }
+        });
+
+        // Load saved settings
+        window.addEventListener('load', () => {
+            const savedFontSize = localStorage.getItem('fontSize') || 'normal';
+            setFontSize(savedFontSize);
+            setAction('chat');
         });
     </script>
 </body>

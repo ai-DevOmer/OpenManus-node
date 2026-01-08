@@ -1,7 +1,7 @@
 {
-  "name": "openmanus-node",
+  "name": "omar-agent",
   "version": "1.0.0",
-  "description": "A Node.js and TypeScript recreation of the OpenManus project, providing a general-purpose AI agent platform capable of performing complex, multi-step tasks autonomously.",
+  "description": "OMAR AGENT - A versatile AI agent platform.",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -17,21 +17,14 @@
     "autonomous",
     "typescript",
     "nodejs",
-    "openmanus",
+    "omar-agent",
     "web-browsing",
     "code-execution"
   ],
-  "author": "rxyshww",
+  "author": "OMAR AGENT",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/rxyshww/OpenManus-node.git"
-  },
-  "bugs": {
-    "url": "https://github.com/rxyshww/OpenManus-node/issues"
-  },
-  "homepage": "https://github.com/rxyshww/OpenManus-node#readme",
   "dependencies": {
+    "@netlify/functions": "^5.1.2",
     "chalk": "^5.4.1",
     "dotenv": "^16.0.3",
     "duck-duck-scrape": "^2.2.7",

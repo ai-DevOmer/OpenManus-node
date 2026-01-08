@@ -18,26 +18,35 @@ export interface ChatMessage {
   }[];
 }
 
-/** Singleton LLM class to interface with OpenAI API */
+/** Singleton LLM class to interface with OpenAI API or compatible (Gemini) */
 export class LLM {
   private static _instances: { [key: string]: LLM } = {};
   private openai: OpenAI;
   private model: string;
   private constructor(apiKey: string, baseURL?: string, model?: string) {
-    this.model = model || process.env.OPENAI_MODEL || "gpt-4";
-    // Initialize OpenAI API client
+    this.model = model || process.env.OPENAI_MODEL || "gemini-2.5-flash";
+    // Initialize OpenAI API client (or compatible)
     this.openai = new OpenAI({
       apiKey,
-      baseURL: baseURL || process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"
+      baseURL: baseURL || process.env.OPENAI_BASE_URL || "https://generativelanguage.googleapis.com/v1beta/openai/"
     });
   }
   /** Get or create a singleton LLM instance (by config name) */
   public static getInstance(configName: string = "default"): LLM {
     if (!LLM._instances[configName]) {
-      const apiKey = process.env.OPENAI_API_KEY;
-      if (!apiKey) throw new Error("Missing OPENAI_API_KEY in environment.");
-      // (In a real scenario, could load different configs by name)
-      LLM._instances[configName] = new LLM(apiKey);
+      // Prioritize GEMINI_API_KEY as requested, fallback to OPENAI_API_KEY
+      const apiKey = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
+      if (!apiKey) throw new Error("Missing GEMINI_API_KEY or OPENAI_API_KEY in environment.");
+      
+      // Determine base URL: if using Gemini key, use Google's endpoint, otherwise default to OpenAI or env var
+      let baseURL = process.env.OPENAI_BASE_URL;
+      if (!baseURL && process.env.GEMINI_API_KEY) {
+         baseURL = "https://generativelanguage.googleapis.com/v1beta/openai/";
+      } else if (!baseURL) {
+         baseURL = "https://api.openai.com/v1";
+      }
+
+      LLM._instances[configName] = new LLM(apiKey, baseURL);
     }
     return LLM._instances[configName];
   }

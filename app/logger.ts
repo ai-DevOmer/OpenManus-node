@@ -26,6 +26,32 @@ const customFormat = format.printf(({ level, message, timestamp }) => {
 });
 
 // 创建日志记录器实例
+const transports: winston.transport[] = [
+    new winston.transports.Console({
+        format: format.combine(
+            format.colorize({ all: true }),
+            customFormat
+        )
+    })
+];
+
+// 确保logs目录存在
+import fs from 'fs';
+import path from 'path';
+
+try {
+    // 尝试在当前目录下创建logs
+    if (!fs.existsSync('logs')) {
+        fs.mkdirSync('logs');
+    }
+    // 如果成功，添加文件传输
+    transports.push(new winston.transports.File({ filename: 'logs/error.log', level: 'error' }));
+    transports.push(new winston.transports.File({ filename: 'logs/combined.log' }));
+} catch (error) {
+    // 在无法写入文件系统时（如Netlify Functions），只使用控制台日志
+    // console.error('无法创建日志目录或文件传输，仅使用控制台日志:', error);
+}
+
 const logger = winston.createLogger({
     level: 'info',
     format: format.combine(
@@ -34,29 +60,8 @@ const logger = winston.createLogger({
         }),
         customFormat
     ),
-    transports: [
-        new winston.transports.Console({
-            format: format.combine(
-                format.colorize({ all: true }),
-                customFormat
-            )
-        }),
-        new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-        new winston.transports.File({ filename: 'logs/combined.log' })
-    ]
+    transports: transports
 });
-
-// 确保logs目录存在
-import fs from 'fs';
-import path from 'path';
-
-try {
-    if (!fs.existsSync('logs')) {
-        fs.mkdirSync('logs');
-    }
-} catch (error) {
-    console.error('无法创建日志目录:', error);
-}
 
 // 添加彩色日志方法
 const colorizedLogger = {

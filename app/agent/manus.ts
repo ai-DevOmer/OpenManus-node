@@ -13,7 +13,7 @@ import { CreateChatCompletion } from "../tool/create_chat_completion";
 import { Terminate } from "../tool/terminate";
 import { SYSTEM_PROMPT, NEXT_STEP_PROMPT } from "../prompt/manus";
 
-/** Manus: a versatile general-purpose agent with a comprehensive set of tools and planning ability */
+/** OmarAgent: a versatile general-purpose agent with a comprehensive set of tools and planning ability */
 export class Manus extends ToolCallAgent {
   // Default system and next-step prompts
   static SYSTEM_PROMPT: string = SYSTEM_PROMPT;
@@ -21,13 +21,13 @@ export class Manus extends ToolCallAgent {
 
   constructor(options: any = {}) {
     super({
-      name: "Manus",
+      name: "OmarAgent",
       description: "A versatile agent that can solve various tasks using multiple tools",
       system_prompt: Manus.SYSTEM_PROMPT,
       next_step_prompt: Manus.NEXT_STEP_PROMPT,
       max_steps: options.max_steps ?? 30
     });
-    // Define a comprehensive set of tools for Manus
+    // Define a comprehensive set of tools for OmarAgent
     this["available_tools"] = new ToolCollection(
       new PythonExecute(),
       new Bash(),

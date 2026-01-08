@@ -1,5 +1,5 @@
 import { BaseTool, ToolError } from "./base";
-import { LLM } from "../llm";
+import { LLM, ChatMessage } from "../llm";
 
 /** Tool to get a direct completion from the LLM (useful for structured output requests) */
 export class CreateChatCompletion extends BaseTool {
@@ -21,7 +21,7 @@ export class CreateChatCompletion extends BaseTool {
     const { prompt, system_prompt } = args;
     if (!prompt) throw new ToolError("Prompt is required for chat completion");
     const llm = LLM.getInstance();
-    const messages = [];
+    const messages: ChatMessage[] = [];
     if (system_prompt) {
       messages.push({ role: "system", content: system_prompt });
     }

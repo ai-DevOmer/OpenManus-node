@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/rxyshww/OpenManus-node#readme",
   "dependencies": {
+    "@google/genai": "^1.0.0",
     "chalk": "^5.4.1",
     "dotenv": "^16.0.3",
     "duck-duck-scrape": "^2.2.7",
@@ -39,7 +40,6 @@
     "googlethis": "^1.8.0",
     "node-fetch": "^3.3.2",
     "node-global-proxy": "^1.0.1",
-    "openai": "4.87.3",
     "playwright": "^1.51.0",
     "toml": "^3.0.0",
     "winston": "^3.17.0"

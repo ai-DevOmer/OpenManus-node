@@ -124,6 +124,7 @@ export class ToolCallAgent extends ReActAgent {
     this.messages.push({
       role: "tool",
       tool_call_id: this.lastToolCallId || `call_${Date.now()}`, // 使用think方法中存储的工具调用ID
+      name: toolName, // Include tool name for Gemini API compatibility
       content: toolResult
     });
 
